@@ -1,33 +1,53 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, TextField, Button, List, ListItem, ListItemText, Paper } from '@mui/material';
+import { Container, Typography, Box, TextField, Button, List, ListItem, ListItemText, Paper, Snackbar, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import axios from 'axios';
 
 function Dashboard() {
   const [moodEntries, setMoodEntries] = useState([]);
+  const [activities, setActivities] = useState([]);
   const [newMood, setNewMood] = useState('');
   const [newNote, setNewNote] = useState('');
+  const [newActivityType, setNewActivityType] = useState('');
+  const [newActivityDuration, setNewActivityDuration] = useState('');
+  const [newActivityNote, setNewActivityNote] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchMoodEntries();
+    fetchActivities();
   }, []);
 
   const fetchMoodEntries = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:3000/api/mood', {
+      const response = await axios.get('http://localhost:5000/api/mood', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMoodEntries(response.data);
     } catch (error) {
       console.error('Error fetching mood entries', error);
+      setError('Failed to fetch mood entries. Please try again.');
     }
   };
 
-  const handleSubmit = async (e) => {
+  const fetchActivities = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/activity', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActivities(response.data);
+    } catch (error) {
+      console.error('Error fetching activities', error);
+      setError('Failed to fetch activities. Please try again.');
+    }
+  };
+
+  const handleMoodSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3000/api/mood', 
+      await axios.post('http://localhost:5000/api/mood', 
         { mood: parseInt(newMood), note: newNote },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -36,6 +56,25 @@ function Dashboard() {
       fetchMoodEntries();
     } catch (error) {
       console.error('Error creating mood entry', error);
+      setError('Failed to add mood entry. Please try again.');
+    }
+  };
+
+  const handleActivitySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('http://localhost:5000/api/activity', 
+        { type: newActivityType, duration: parseInt(newActivityDuration), note: newActivityNote },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNewActivityType('');
+      setNewActivityDuration('');
+      setNewActivityNote('');
+      fetchActivities();
+    } catch (error) {
+      console.error('Error creating activity', error);
+      setError('Failed to add activity. Please try again.');
     }
   };
 
@@ -43,13 +82,15 @@ function Dashboard() {
     <Container maxWidth="md">
       <Box sx={{ mt: 4, mb: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Mood Tracker Dashboard
+          Mental Health Dashboard
         </Typography>
+        
+        {/* Mood Entry Form */}
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" gutterBottom>
             Add New Mood Entry
           </Typography>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleMoodSubmit}>
             <TextField
               fullWidth
               label="Mood (1-5)"
@@ -73,22 +114,75 @@ function Dashboard() {
             </Button>
           </form>
         </Paper>
+
+        {/* Activity Entry Form */}
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Add New Activity
+          </Typography>
+          <form onSubmit={handleActivitySubmit}>
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Activity Type</InputLabel>
+              <Select
+                value={newActivityType}
+                label="Activity Type"
+                onChange={(e) => setNewActivityType(e.target.value)}
+              >
+                <MenuItem value="exercise">Exercise</MenuItem>
+                <MenuItem value="meditation">Meditation</MenuItem>
+                <MenuItem value="reading">Reading</MenuItem>
+                <MenuItem value="socializing">Socializing</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="Duration (minutes)"
+              type="number"
+              value={newActivityDuration}
+              onChange={(e) => setNewActivityDuration(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Note"
+              value={newActivityNote}
+              onChange={(e) => setNewActivityNote(e.target.value)}
+              multiline
+              rows={2}
+              sx={{ mb: 2 }}
+            />
+            <Button type="submit" variant="contained" color="secondary">
+              Add Activity
+            </Button>
+          </form>
+        </Paper>
+
+        {/* Recent Entries */}
         <Paper elevation={3} sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
-            Recent Mood Entries
+            Recent Entries
           </Typography>
           <List>
-            {moodEntries.map((entry, index) => (
-              <ListItem key={index} divider>
-                <ListItemText 
-                  primary={`Mood: ${entry.mood}`} 
-                  secondary={`${entry.note} - ${new Date(entry.createdAt).toLocaleString()}`} 
-                />
-              </ListItem>
-            ))}
+            {[...moodEntries, ...activities]
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .map((entry, index) => (
+                <ListItem key={index} divider>
+                  <ListItemText 
+                    primary={entry.mood ? `Mood: ${entry.mood}` : `Activity: ${entry.type}`} 
+                    secondary={`${entry.note} - ${new Date(entry.createdAt).toLocaleString()}`} 
+                  />
+                </ListItem>
+              ))
+            }
           </List>
         </Paper>
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError('')}
+        message={error}
+      />
     </Container>
   );
 }
