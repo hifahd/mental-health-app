@@ -1,4 +1,4 @@
-const Activity = require('../models/Activity');
+const Activity = require('./models/Activity');
 
 exports.createActivity = async (req, res) => {
   try {

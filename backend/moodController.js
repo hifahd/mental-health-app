@@ -1,4 +1,4 @@
-const MoodEntry = require('../models/MoodEntry');
+const MoodEntry = require('./models/MoodEntry');
 
 exports.createMoodEntry = async (req, res) => {
   try {
