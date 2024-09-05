@@ -14,7 +14,10 @@ function Signup() {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/signup', { username, email, password });
+      const response = await axios.post('http://192.168.1.112:5000/api/auth/signup', 
+        { username, email, password },
+        { withCredentials: true }
+      );
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (error) {

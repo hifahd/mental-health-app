@@ -12,10 +12,11 @@ const activityController = require('./activityController');
 const authMiddleware = require('./auth/authMiddleware');
 
 const app = express();
-const port = process.env.PORT || 5000; // Changed to 5000
+const port = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'http://localhost:3000' // This allows requests from your React app
+  origin: ['http://localhost:3000', 'http://192.168.1.112:3000'],
+  credentials: true
 }));
 app.use(express.json());
 
