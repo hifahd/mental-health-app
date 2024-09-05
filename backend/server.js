@@ -8,6 +8,9 @@ const User = require('./models/User');
 const MoodEntry = require('./models/MoodEntry');
 const Activity = require('./models/Activity');
 
+// Import auth controller
+const authController = require('./auth/authController');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -23,7 +26,9 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Mental Health Support App API' });
 });
 
-// TODO: Add routes for user authentication, mood entries, and activities
+// Auth routes
+app.post('/api/auth/signup', authController.signup);
+app.post('/api/auth/login', authController.login);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
