@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Box } from '@mui/material';
+import { TextField, Button, Typography, Container, Box, Snackbar } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/signup', { username, email, password });
+      const response = await axios.post('http://localhost:5000/api/auth/signup', { username, email, password });
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (error) {
       console.error('Signup failed', error);
+      setError(error.response?.data?.message || 'Signup failed. Please try again.');
     }
   };
 
@@ -71,7 +74,14 @@ function Signup() {
             Sign Up
           </Button>
         </Box>
+        <Link to="/">Already have an account? Sign in</Link>
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError('')}
+        message={error}
+      />
     </Container>
   );
 }

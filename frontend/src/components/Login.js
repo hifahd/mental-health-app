@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Typography, Container, Box } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -58,6 +59,9 @@ function Login() {
           >
             Sign In
           </Button>
+          <Box mt={2}>
+            <Link to="/signup">Don't have an account? Sign Up</Link>
+          </Box>
         </Box>
       </Box>
     </Container>
