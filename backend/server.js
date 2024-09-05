@@ -3,13 +3,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
-// Import models
-const User = require('./models/User');
-const MoodEntry = require('./models/MoodEntry');
-const Activity = require('./models/Activity');
-
-// Import auth controller
+// Import controllers
 const authController = require('./auth/authController');
+const moodController = require('./moodController');
+const activityController = require('./activityController');
+
+// Import middleware
+const authMiddleware = require('./auth/authMiddleware');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,6 +22,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('Could not connect to MongoDB', err));
 
+// Routes
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the Mental Health Support App API' });
 });
@@ -29,6 +30,14 @@ app.get('/', (req, res) => {
 // Auth routes
 app.post('/api/auth/signup', authController.signup);
 app.post('/api/auth/login', authController.login);
+
+// Mood routes
+app.post('/api/mood', authMiddleware, moodController.createMoodEntry);
+app.get('/api/mood', authMiddleware, moodController.getMoodEntries);
+
+// Activity routes
+app.post('/api/activity', authMiddleware, activityController.createActivity);
+app.get('/api/activity', authMiddleware, activityController.getActivities);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
