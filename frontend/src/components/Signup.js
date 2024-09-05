@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Container, Box } from '@mui/material';
 import axios from 'axios';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 function Signup() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/api/auth/signup', { username, email, password });
       localStorage.setItem('token', response.data.token);
-      history.push('/dashboard');
+      navigate('/dashboard');
     } catch (error) {
       console.error('Signup failed', error);
     }
