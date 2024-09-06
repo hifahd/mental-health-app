@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Paper, List, ListItem, ListItemText, Avatar } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper, List, ListItem, ListItemText, Avatar, Chip } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import PersonIcon from '@mui/icons-material/Person';
@@ -32,7 +32,11 @@ function Chatbot() {
 
     try {
       const response = await axios.post('http://localhost:5000/api/chatbot', { message: input });
-      const botMessage = { text: response.data.message, sender: 'bot' };
+      const botMessage = { 
+        text: response.data.message, 
+        sender: 'bot',
+        analysis: response.data.analysis
+      };
       setMessages(messages => [...messages, botMessage]);
     } catch (error) {
       console.error('Error sending message to chatbot', error);
@@ -56,6 +60,14 @@ function Chatbot() {
                 </Avatar>
                 <Paper elevation={1} sx={{ p: 1, bgcolor: message.sender === 'user' ? 'primary.light' : 'secondary.light', maxWidth: '70%' }}>
                   <ListItemText primary={message.text} />
+                  {message.analysis && (
+                    <Box sx={{ mt: 1 }}>
+                      <Chip label={`Sentiment: ${message.analysis.sentiment.toFixed(2)}`} size="small" sx={{ mr: 1 }} />
+                      {message.analysis.topics.map((topic, i) => (
+                        <Chip key={i} label={topic} size="small" sx={{ mr: 1 }} />
+                      ))}
+                    </Box>
+                  )}
                 </Paper>
               </Box>
             </ListItem>
