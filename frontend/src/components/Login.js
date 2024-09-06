@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Container, Box } from '@mui/material';
+import { TextField, Button, Typography, Container, Box, Snackbar } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/login', { email, password });
+      const response = await axios.post('http://localhost:5000/api/auth/login', { email, password });
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (error) {
       console.error('Login failed', error);
+      setError(error.response?.data?.message || 'Login failed. Please try again.');
     }
   };
 
@@ -59,11 +60,17 @@ function Login() {
           >
             Sign In
           </Button>
-          <Box mt={2}>
-            <Link to="/signup">Don't have an account? Sign Up</Link>
-          </Box>
+          <Link to="/signup">
+            Don't have an account? Sign Up
+          </Link>
         </Box>
       </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError('')}
+        message={error}
+      />
     </Container>
   );
 }
