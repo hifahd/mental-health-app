@@ -7,6 +7,7 @@ require('dotenv').config();
 const authController = require('./auth/authController');
 const moodController = require('./moodController');
 const activityController = require('./activityController');
+const chatbotController = require('./chatbotController');
 
 // Import middleware
 const authMiddleware = require('./auth/authMiddleware');
@@ -41,6 +42,8 @@ app.get('/api/mood', authMiddleware, moodController.getMoodEntries);
 // Activity routes
 app.post('/api/activity', authMiddleware, activityController.createActivity);
 app.get('/api/activity', authMiddleware, activityController.getActivities);
+
+app.post('/api/chatbot', chatbotController.sendMessage);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
